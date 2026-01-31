@@ -1,15 +1,16 @@
-class chessPiece {
+/* class chessPiece {
   constructor(name, color) {
     this.name = name;
     this.color = color;
     this.x = initX;
     this.y = initY;
   }
-}
+} */
 
-class Pawn extends chessPiece {
+class Pawn {
   constructor() {
-      super(alias, color);
+    this.name = 'pawn';
+    this.color = 'white';
       this.moves = [
         [0, 1],
       ];
@@ -76,6 +77,7 @@ class Queen extends chessPiece {
       ];
     }
 }
+
 class Bishop extends chessPiece {
   constructor() {
       super(alias, color, X, Y);
@@ -159,23 +161,29 @@ start_point.appendChild(img);
 const dim = grid.getBoundingClientRect();
 
 document.querySelector('.board').addEventListener('click', (e) => {
-    let clickX = e.clientX - dim.left;
-    let clickY = e.clientY - dim.top;
-    const row = Math.floor(clickY / 50);
-    const col = Math.floor(clickX / 50);
+  let clickX = e.clientX - dim.left;
+  let clickY = e.clientY - dim.top;
+  const row = Math.floor(clickY / 50);
+  const col = Math.floor(clickX / 50);
 
     
-    const cell = cells.get(`${row},${col}`);
-    const piece = tracker[row][col];
-    if (!piece) return;
+  const cell = cells.get(`${row},${col}`);
+  const piece = tracker[row][col];
+  if (!piece) return;
 
-    if (active) {
-        cells.get(active).classList.remove("active");
-    }
-    
-    const potential_moves = piece.moves.map(el => [row + el[0], col + el[1]]);
-    
-
+  if (active) {
+    cells.get(active).classList.remove("active");
+  }
+  
+  const potential_moves = piece.moves.map(el => {
+    const next = cells.get(`${row + -el[1]},${col + el[0]}`);
+    console.log(next);
+    if (next) return next;
+  });
+  
+  potential_moves.forEach(el => {
+    el.classList.add('active');
+  });
 
     cell.classList.add("active");
     active = `${row},${col}`;
