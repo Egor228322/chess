@@ -8,13 +8,33 @@
 } */
 
 class Pawn {
-  constructor() {
-    this.name = 'pawn';
-    this.color = 'white';
+  constructor(name, color, R, C) {
+    this.name = name;
+    this.color = color;
+    this.R = R;
+    this.C = C;
       this.moves = [
-        [0, 1],
+        [1, 0],
       ];
-    }
+  }
+  
+
+  //Calculate next moves when grid is clicked.
+  next_move() {
+
+    const potential_moves = this.moves.map((el) => {
+      const next_row = this.R + -el[0];
+      const next_col = this.C + el[1];
+      if (next_row < 0) return;
+
+      //Check if can eat
+      
+      //check for obstruction
+      return cells.get(`${next_row},${next_col}`);
+     });
+
+    return potential_moves;
+  }
 }
 
 /* class King extends chessPiece {
@@ -97,6 +117,7 @@ class Bishop extends chessPiece {
 let RUNNING = true;
 let turn = 0;
 let active = null;
+let next_moves = [];
 const tracker = Array.from({ length: 8 }, () => new Array(8).fill(null));
 const cells = new Map();
 //render the squares
@@ -119,14 +140,19 @@ for (let i = 0; i < 8; i++) {
     }
 }
 
-const pawn = new Pawn('pawn', 'white');
+const pawn = new Pawn('pawn', 'white', 7, 4);
 tracker[7][4] = pawn;
 
+const pawn1 = new Pawn("pawn", "white", 7, 5);
+tracker[7][5] = pawn1;
 
-const start_point = cells.get("7,4");
-const img = document.createElement("svg");
-img.className = 'piece'
-img.innerHTML = `<svg fill="#000000" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+for (let i = 0; i < 8; i++) {
+  for (let j = 0; j < 8; j++) {
+    if (tracker[i][j]) {
+      const start_point = cells.get(`${i},${j}`);
+      const img = document.createElement("svg");
+      img.className = "piece";
+      img.innerHTML = `<svg fill="#000000" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 	 viewBox="0 0 512 512" xml:space="preserve">
 <g>
 	<g>
@@ -156,7 +182,10 @@ img.innerHTML = `<svg fill="#000000" height="800px" width="800px" version="1.1" 
 	</g>
 </g>
 </svg>`;
-start_point.appendChild(img);
+      start_point.appendChild(img);
+    }
+  }
+}
 
 const dim = grid.getBoundingClientRect();
 
@@ -167,21 +196,24 @@ document.querySelector('.board').addEventListener('click', (e) => {
   const col = Math.floor(clickX / 50);
 
     
-  const cell = cells.get(`${row},${col}`);
   const piece = tracker[row][col];
+  console.log(piece);
   if (!piece) return;
-
+  
+  const cell = cells.get(`${row},${col}`);
   if (active) {
     cells.get(active).classList.remove("active");
   }
   
-  const potential_moves = piece.moves.map(el => {
-    const next = cells.get(`${row + -el[1]},${col + el[0]}`);
-    console.log(next);
-    if (next) return next;
-  });
-  
-  potential_moves.forEach(el => {
+  if (next_moves) {
+    while (next_moves.length !== 0) {
+      next_moves.pop().classList.remove('active');
+    }
+  }
+
+  next_moves = piece.next_move();
+
+  next_moves.forEach(el => {
     el.classList.add('active');
   });
 
