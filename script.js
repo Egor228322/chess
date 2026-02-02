@@ -32,12 +32,12 @@ class Pawn {
       return { next_row, next_col, node};
     });
     
-    const eating_moves = [];
+    /* const eating_moves = [];
     
     if (tracker[this.R - 1][this.C + 1]) eating_moves.push(cells.get(`${this.R - 1},${this.C + 1}`));
-    if (tracker[this.R - 1][this.C - 1]) eating_moves.push(cells.get(`${this.R - 1},${this.C - 1}`));
+    if (tracker[this.R - 1][this.C - 1]) eating_moves.push(cells.get(`${this.R - 1},${this.C - 1}`)); */
 
-    return { potential_moves: potential_moves, eating_moves: eating_moves };
+    return [...potential_moves];
   }
 }
 
@@ -198,16 +198,12 @@ document.querySelector('.board').addEventListener('click', (e) => {
   let clickY = e.clientY - dim.top;
   const row = Math.floor(clickY / 50);
   const col = Math.floor(clickX / 50);
-
     
   const piece = tracker[row][col];
-  //console.log(piece);
-  //if (!piece) return;
-  
   const cell = cells.get(`${row},${col}`);
+  
 
-  if (active) {
-
+  if (active.length !== 0) {
     for (let i = 0; i < next_moves.length; i++) {
       if (next_moves[i].next_row === row && next_moves[i].next_col === col) {
         const obj = tracker[active[0]][active[1]];
@@ -215,14 +211,47 @@ document.querySelector('.board').addEventListener('click', (e) => {
         obj.C = col;
         tracker[active[0]][active[1]] = null;
         tracker[next_moves[i].next_row][next_moves[i].next_col] = obj;
-        const node = cells.get(`${active[0]},${active[1]}`);
-        node.classList.remove("active");
-        const child = node.children[0];
-        node.removeChild(child);
-        const start_point = cells.get(`${row},${col}`);
-        const img = document.createElement("svg");
-        img.className = "piece";
-        img.innerHTML = `<svg fill="#000000" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+        cleanUpDOM();
+        renderPiece(row, col);
+        return;
+      }
+      
+    }
+  } else {
+    next_moves = piece.next_move();
+    console.log(next_moves);
+
+    next_moves.forEach((el) => {
+      el.node.classList.add("active");
+    });
+
+    cell.classList.add("active");
+    active = [row, col];
+  } 
+});
+
+//resets next moves and active 
+function cleanUpDOM() {
+  const node = cells.get(`${active[0]},${active[1]}`);
+  node.classList.remove('active');
+  console.log(node);
+  node.removeChild(node.children[0]);
+
+  if (next_moves) {
+    while (next_moves.length !== 0) {
+      next_moves.pop().node.classList.remove("active");
+    }
+  }
+  active = [];
+  
+}
+
+// renders piece into new location
+function renderPiece(row, col) {
+  const start_point = cells.get(`${row},${col}`);
+  const img = document.createElement("svg");
+  img.className = "piece";
+  img.innerHTML = `<svg fill="#000000" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 	 viewBox="0 0 512 512" xml:space="preserve">
 <g>
 	<g>
@@ -252,36 +281,8 @@ document.querySelector('.board').addEventListener('click', (e) => {
 	</g>
 </g>
 </svg>`;
-        start_point.appendChild(img);
-
-        if (next_moves) {
-          while (next_moves.length !== 0) {
-            next_moves.pop().node.classList.remove("active");
-          }
-        }
-
-        active = [];
-        next_moves = [];
-        return;
-      }
-      
-    }
-  }
-
-  next_moves = piece.next_move();
-  const { potential_moves, eating_moves } = next_moves;
-
-  potential_moves.forEach(el => {
-    el.node.classList.add('active');
-  });
-
-  eating_moves.forEach(el => {
-    el.node.classList.add('danger');
-  });
-
-    cell.classList.add("active");
-    active = [row, col];
-});
+  start_point.appendChild(img);
+}
 
 function move(curr) {
     
