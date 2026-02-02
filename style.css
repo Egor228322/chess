@@ -52,3 +52,7 @@ svg {
 .active {
     background-color: lightblue;
 }
+
+.danger {
+    background-color: red;
+}
