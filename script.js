@@ -13,25 +13,21 @@ class Pawn {
     this.color = color;
     this.R = R;
     this.C = C;
-      this.moves = [
-        [1, 0],
-      ];
+    this.moves = [[1, 0]];
   }
-  
 
   //Calculate next moves when grid is clicked.
   next_move() {
-
     const potential_moves = this.moves.map((el) => {
       const next_row = this.R + -el[0];
       const next_col = this.C + el[1];
       if (next_row < 0) return;
-      
+
       //check for obstruction
       const node = cells.get(`${next_row},${next_col}`);
-      return { next_row, next_col, node};
+      return { next_row, next_col, node };
     });
-    
+
     /* const eating_moves = [];
     
     if (tracker[this.R - 1][this.C + 1]) eating_moves.push(cells.get(`${this.R - 1},${this.C + 1}`));
@@ -118,21 +114,22 @@ class Bishop extends chessPiece {
     }
 } */
 
+const grid = document.querySelector(".grid");
+const dim = grid.getBoundingClientRect();
+const tracker = Array.from({ length: 8 }, () => new Array(8).fill(null));
+const cells = new Map();
 let RUNNING = true;
 let turn = 0;
 let active = [];
 let next_moves = [];
-const tracker = Array.from({ length: 8 }, () => new Array(8).fill(null));
-const cells = new Map();
 //render the squares
 
-const grid = document.querySelector(".grid");
 flag = false;
 for (let i = 0; i < 8; i++) {
   for (let j = 0; j < 8; j++) {
     const el = document.createElement("li");
-      el.classList.add('.cell');
-      el.classList.add()
+    el.classList.add(".cell");
+    el.classList.add();
     cells.set(`${i},${j}`, el);
     if (i % 2 == 0) {
       flag == true ? el.classList.add("even") : el.classList.add("odd");
@@ -141,10 +138,10 @@ for (let i = 0; i < 8; i++) {
     }
     flag = !flag;
     grid.append(el);
-    }
+  }
 }
 
-const pawn = new Pawn('pawn', 'white', 7, 4);
+const pawn = new Pawn("pawn", "white", 7, 4);
 tracker[7][4] = pawn;
 
 const pawn1 = new Pawn("pawn", "white", 7, 5);
@@ -191,49 +188,30 @@ for (let i = 0; i < 8; i++) {
   }
 }
 
-const dim = grid.getBoundingClientRect();
+document.querySelector(".board").addEventListener("click", (e) => {
+  const [row, col] = getCell(e);
+  const cell = cells.get(`${row},${col}`);
 
-document.querySelector('.board').addEventListener('click', (e) => {
+  if (active.length !== 0) {
+    move(row, col);
+  } else {
+    renderNextMoves(row, col, cell);
+  }
+});
+
+//returns row and column of clicked cell
+function getCell(e) {
   let clickX = e.clientX - dim.left;
   let clickY = e.clientY - dim.top;
   const row = Math.floor(clickY / 50);
   const col = Math.floor(clickX / 50);
-    
-  const piece = tracker[row][col];
-  const cell = cells.get(`${row},${col}`);
-  
+  return [row, col];
+}
 
-  if (active.length !== 0) {
-    for (let i = 0; i < next_moves.length; i++) {
-      if (next_moves[i].next_row === row && next_moves[i].next_col === col) {
-        const obj = tracker[active[0]][active[1]];
-        obj.R = row;
-        obj.C = col;
-        tracker[active[0]][active[1]] = null;
-        tracker[next_moves[i].next_row][next_moves[i].next_col] = obj;
-        cleanUpDOM();
-        renderPiece(row, col);
-        return;
-      }
-      
-    }
-  } else {
-    next_moves = piece.next_move();
-    console.log(next_moves);
-
-    next_moves.forEach((el) => {
-      el.node.classList.add("active");
-    });
-
-    cell.classList.add("active");
-    active = [row, col];
-  } 
-});
-
-//resets next moves and active 
-function cleanUpDOM() {
+//resets next moves and active
+function cleanUpBoard() {
   const node = cells.get(`${active[0]},${active[1]}`);
-  node.classList.remove('active');
+  node.classList.remove("active");
   console.log(node);
   node.removeChild(node.children[0]);
 
@@ -243,7 +221,6 @@ function cleanUpDOM() {
     }
   }
   active = [];
-  
 }
 
 // renders piece into new location
@@ -284,12 +261,32 @@ function renderPiece(row, col) {
   start_point.appendChild(img);
 }
 
-function move(curr) {
-    
-    //take curr row and col
-    const { row, col } = curr;
+// renders next moves and active cells
+function renderNextMoves(row, col, cell) {
+  next_moves = tracker[row][col].next_move();
 
-    //check if piece exists
-    if (!tracker[row][col]) return;
+  next_moves.forEach((el) => {
+    el.node.classList.add("active");
+  });
 
+  cell.classList.add("active");
+  active = [row, col];
+}
+
+// changes the object's row and col
+// makes change in tracker
+// Calls cleanUpBoard, and renderPiece
+function move(row, col) {
+  for (let i = 0; i < next_moves.length; i++) {
+    if (next_moves[i].next_row === row && next_moves[i].next_col === col) {
+      const obj = tracker[active[0]][active[1]];
+      obj.R = row;
+      obj.C = col;
+      tracker[active[0]][active[1]] = null;
+      tracker[row][col] = obj;
+      cleanUpBoard();
+      renderPiece(row, col);
+      return;
+    }
+  }
 }
