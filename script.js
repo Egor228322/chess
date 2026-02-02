@@ -5,12 +5,35 @@ class ChessPiece {
     this.R = R;
     this.C = C;
   }
+
+  next_move() {
+    const potential_moves = [];
+
+    for (let i = 0; i < this.moves.length; i++) {
+      let row = this.R;
+      let col = this.C;
+      let counter = 0;
+      const max = this.range ? 8 : 1;
+      while (counter < max) {
+        row += this.moves[i][0];
+        col += this.moves[i][1];
+        if (row < 0 || row > 7 || col < 0 || col > 7 || tracker[row][col])
+          break;
+        const node = cells.get(`${row},${col}`);
+        potential_moves.push({ next_row: row, next_col: col, node });
+        counter++;
+      }
+    }
+
+    return potential_moves;
+  }
 }
 
-/* class Pawn extends ChessPiece {
+class Pawn extends ChessPiece {
   constructor(name, color, R, C) {
     super(name, color, R, C);
-    this.moves = [[1, 0]];
+    this.ranged = false;
+    this.moves = color == "white" ? [[-1, 0]] : [[1, 0]];
     this.icon = `<svg fill="#000000" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 	 viewBox="0 0 512 512" xml:space="preserve">
 <g>
@@ -40,33 +63,14 @@ class ChessPiece {
 		</g>
 	</g>
 </g>
-</svg>`
+</svg>`;
   }
+}
 
-  //Calculate next moves when grid is clicked.
-  next_move() {
-    const potential_moves = this.moves.map((el) => {
-      const next_row = this.R + -el[0];
-      const next_col = this.C + el[1];
-      if (next_row < 0) return;
-
-      //check for obstruction
-      const node = cells.get(`${next_row},${next_col}`);
-      return { next_row, next_col, node };
-    });
-
-    const eating_moves = [];
-    
-    if (tracker[this.R - 1][this.C + 1]) eating_moves.push(cells.get(`${this.R - 1},${this.C + 1}`));
-    if (tracker[this.R - 1][this.C - 1]) eating_moves.push(cells.get(`${this.R - 1},${this.C - 1}`));
-
-    return [...potential_moves];
-  }
-} */
-
-/* class Knight extends ChessPiece {
+class Knight extends ChessPiece {
   constructor(name, color, R, C) {
     super(name, color, R, C);
+    this.range = false;
     this.moves = [
       [1, 2],
       [2, 1],
@@ -106,25 +110,12 @@ class ChessPiece {
 </g>
 </svg>`;
   }
-
-  //Calculate next moves when grid is clicked.
-  next_move() {
-    const potential_moves = this.moves.map((el) => {
-      const next_row = this.R + el[0];
-      const next_col = this.C + el[1];
-      if (next_row >= 0 && next_row <= 7 && next_col >= 0 && next_col <= 7) {
-        const node = cells.get(`${next_row},${next_col}`);
-        return { next_row, next_col, node };
-      }
-    });
-
-    return potential_moves.filter((el) => el !== undefined);
-  }
-} */
+}
 
 /* class Queen extends ChessPiece {
   constructor(name, color, R, C) {
     super(name, color, R, C);
+    this.range = true;
     this.moves = [
       [1, 1],
       [1, -1],
@@ -172,31 +163,12 @@ class ChessPiece {
 </g>
 </svg>`;
   }
-
-  next_move() {
-
-    const potential_moves = [];
-
-    for (let i = 0; i < 8; i++) {
-      let row = this.R;
-      let col = this.C;
-      while (true) {
-        row += this.moves[i][0];
-        col += this.moves[i][1];
-        if (row < 0 || row > 7 || col < 0 || col > 7) break;
-        const node = cells.get(`${row},${col}`);
-        potential_moves.push({ next_row: row, next_col: col, node });
-      }
-    }
-
-    return potential_moves;
-
-  }
 } */
 
 class Rook extends ChessPiece {
   constructor(name, color, R, C) {
     super(name, color, R, C);
+    this.range = true;
     this.moves = [
       [0, 1],
       [0, -1],
@@ -217,28 +189,11 @@ class Rook extends ChessPiece {
     </g>
 </svg>`;
   }
-
-  next_move() {
-    const potential_moves = [];
-
-    for (let i = 0; i < 4; i++) {
-      let row = this.R;
-      let col = this.C;
-      while (true) {
-        row += this.moves[i][0];
-        col += this.moves[i][1];
-        if (row < 0 || row > 7 || col < 0 || col > 7) break;
-        const node = cells.get(`${row},${col}`);
-        potential_moves.push({ next_row: row, next_col: col, node });
-      }
-    }
-
-    return potential_moves;
-  }
 }
 /* class King extends ChessPiece {
   constructor(name, color, R, C) {
       super(name, color, R, C);
+      this.range = false;
       this.moves = [
         [0, 1],
         [0, -1],
@@ -274,25 +229,12 @@ class Rook extends ChessPiece {
 </g>
 </svg>`;
     }
-    
-    next_move() {
-    const potential_moves = this.moves.map((el) => {
-      const next_row = this.R + el[0];
-      const next_col = this.C + el[1];
-      if (next_row >= 0 && next_row <= 7 && next_col >= 0 && next_col <= 7) {
-        const node = cells.get(`${next_row},${next_col}`);
-        return { next_row, next_col, node };
-      }
-    });
-
-    return potential_moves.filter((el) => el !== undefined);
-  }
 } */
 
 /* class Bishop extends ChessPiece {
   constructor(name, color, R, C) {
       super(name, color, R, C);
-    this.range = 8;
+    this.range = true;
     this.moves = [[1,1], [1, -1], [-1, 1], [-1, -1]]
     this.icon = `<svg fill="#000000" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 	 viewBox="0 0 301.885 301.885" xml:space="preserve">
@@ -313,25 +255,6 @@ class Rook extends ChessPiece {
 	</g>
 </g>
 </svg>`;
-  }
-  
-  next_move() {
-    
-    const potential_moves = [];
-
-    for (let i = 0; i < 4; i++) {
-      let row = this.R;
-      let col = this.C;
-      while (true) {
-        row += this.moves[i][0];
-        col += this.moves[i][1];
-        if (row < 0 || row > 7 || col < 0 || col > 7) break;
-        const node = cells.get(`${row},${col}`);
-        potential_moves.push({ next_row: row, next_col: col, node });
-      }
-    }
-
-    return potential_moves;
   }
 } */
 
@@ -364,6 +287,10 @@ for (let i = 0; i < 8; i++) {
 
 const rook = new Rook("rook", "white", 4, 4);
 tracker[4][4] = rook;
+const pawn = new Pawn("pawn", "white", 6, 4);
+tracker[6][4] = pawn;
+const knight = new Knight("knight", "white", 7, 3);
+tracker[7][3] = knight;
 
 for (let i = 0; i < 8; i++) {
   for (let j = 0; j < 8; j++) {
@@ -371,19 +298,7 @@ for (let i = 0; i < 8; i++) {
       const start_point = cells.get(`${i},${j}`);
       const img = document.createElement("svg");
       img.className = "piece";
-      img.innerHTML = `<svg width="800px" height="800px" viewBox="-10 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
-    
-    <title>Rook</title>
-    <desc>Created with Sketch.</desc>
-    <defs>
-
-</defs>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-        <path d="M41,1 L39,1 C37.9,1 37,1.9 37,3 L37,6 L31,6 L31,3 C31,1.9 30.1,1 29,1 L27,1 C25.9,1 25,1.9 25,3 L25,6 L19,6 L19,3 C19,1.9 18.1,1 17,1 L15,1 C13.9,1 13,1.9 13,3 L13,6 L7,6 L7,3 C7,1.9 6.1,1 5,1 L3,1 C1.9,1 1,1.9 1,3 L1,14 C1,15.1 1.9,16 3,16 L11,20 L11,46 L3,54 C1.9,54 1,54.9 1,56 L1,61 C1,62.1 1.9,63 3,63 L41,63 C42.1,63 43,62.1 43,61 L43,56 C43,54.9 42.1,54 41,54 L33,47 L33,20 L41,16 C42.1,16 43,15.1 43,14 L43,3 C43,1.9 42.1,1 41,1 L41,1 Z" id="Pawn" stroke="#6B6C6E" stroke-width="2" sketch:type="MSShapeGroup">
-
-</path>
-    </g>
-</svg>`;
+      img.innerHTML = tracker[i][j].icon;
       start_point.appendChild(img);
     }
   }
@@ -392,10 +307,16 @@ for (let i = 0; i < 8; i++) {
 document.querySelector(".board").addEventListener("click", (e) => {
   const [row, col] = getCell(e);
   const cell = cells.get(`${row},${col}`);
+  const obj = active.length ? tracker[active[0]][active[1]] : '';
 
-  if (active.length !== 0) {
-    move(row, col);
-  } else {
+  if (active.length !== 0 && move(row, col)) {
+    renderPiece(row, col, obj);
+    cleanUpBoard(true);
+  } else if (active.length !== 0) {
+    console.log('hello')
+    cleanUpBoard(false);
+    renderNextMoves(row, col, cell);
+  } else if (tracker[row][col]) {
     renderNextMoves(row, col, cell);
   }
 });
@@ -419,11 +340,11 @@ function cleanUpBoard(valid) {
       next_moves.pop().node.classList.remove("active");
     }
   }
-  
+
   if (valid) {
     node.removeChild(node.children[0]);
   }
-  
+
   active = [];
 }
 
@@ -452,6 +373,7 @@ function renderNextMoves(row, col, cell) {
 // makes change in tracker
 // Calls cleanUpBoard, and renderPiece
 function move(row, col) {
+  
   for (let i = 0; i < next_moves.length; i++) {
     if (next_moves[i].next_row === row && next_moves[i].next_col === col) {
       const obj = tracker[active[0]][active[1]];
@@ -459,10 +381,8 @@ function move(row, col) {
       obj.C = col;
       tracker[active[0]][active[1]] = null;
       tracker[row][col] = obj;
-      cleanUpBoard(true);
-      renderPiece(row, col, obj);
-      return;
+      return true;
     }
   }
-    cleanUpBoard(false);
+  return false;
 }
