@@ -48,8 +48,11 @@ svg {
 .even {
     background-color: white;
 }
+
 .active {
     background-color: lightblue;
+    border: 0.1px solid black;
+    border-collapse: collapse;
 }
 
 .danger {
