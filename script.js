@@ -66,7 +66,6 @@ class Pawn extends ChessPiece {
 </svg>`;
   }
 }
-
 class Knight extends ChessPiece {
   constructor(name, color, R, C) {
     super(name, color, R, C);
@@ -111,8 +110,7 @@ class Knight extends ChessPiece {
 </svg>`;
   }
 }
-
-/* class Queen extends ChessPiece {
+class Queen extends ChessPiece {
   constructor(name, color, R, C) {
     super(name, color, R, C);
     this.range = true;
@@ -163,8 +161,7 @@ class Knight extends ChessPiece {
 </g>
 </svg>`;
   }
-} */
-
+}
 class Rook extends ChessPiece {
   constructor(name, color, R, C) {
     super(name, color, R, C);
@@ -190,7 +187,7 @@ class Rook extends ChessPiece {
 </svg>`;
   }
 }
-/* class King extends ChessPiece {
+class King extends ChessPiece {
   constructor(name, color, R, C) {
       super(name, color, R, C);
       this.range = false;
@@ -229,9 +226,8 @@ class Rook extends ChessPiece {
 </g>
 </svg>`;
     }
-} */
-
-/* class Bishop extends ChessPiece {
+}
+class Bishop extends ChessPiece {
   constructor(name, color, R, C) {
       super(name, color, R, C);
     this.range = true;
@@ -256,7 +252,7 @@ class Rook extends ChessPiece {
 </g>
 </svg>`;
   }
-} */
+}
 
 const grid = document.querySelector(".grid");
 const dim = grid.getBoundingClientRect();
@@ -313,7 +309,6 @@ document.querySelector(".board").addEventListener("click", (e) => {
     renderPiece(row, col, obj);
     cleanUpBoard(true);
   } else if (active.length !== 0) {
-    console.log('hello')
     cleanUpBoard(false);
     renderNextMoves(row, col, cell);
   } else if (tracker[row][col]) {
