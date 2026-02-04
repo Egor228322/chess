@@ -393,6 +393,10 @@ function renderPiece(row, col, obj) {
 // renders next moves and active cells
 function renderNextMoves(row, col, cell) {
   active = [row, col];
+
+  if ((tracker[row][col].color !== 'white') && turn) return;
+  if ((tracker[row][col].color !== 'black') && !turn) return;
+
   cell.classList.add("active");
   next_moves = tracker[row][col].next_move();
 
@@ -436,4 +440,6 @@ function move(row, col) {
   obj.C = col;
   tracker[active[0]][active[1]] = null;
   tracker[row][col] = obj;
+  
+  turn = !turn;
 }
