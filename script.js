@@ -161,6 +161,7 @@ class ChessPiece {
     this.color = color;
     this.R = R;
     this.C = C;
+    this.potential_moves = [];
   }
 
   next_move() {
@@ -179,11 +180,11 @@ class ChessPiece {
           row > 7 ||
           col < 0 ||
           col > 7 ||
-          checkCapture(row, col, potential_moves)
+          this.checkCapture(row, col)
         )
           break;
         const node = cells.get(`${row},${col}`);
-        potential_moves.push({
+        this.potential_moves.push({
           next_row: row,
           next_col: col,
           node,
@@ -192,7 +193,48 @@ class ChessPiece {
         counter++;
       }
     }
-    return potential_moves;
+    return this.potential_moves;
+  }
+
+  addToList(row, col) {
+    if (tracker[row][col].color !== this.color) {
+      const node = cells.get(`${row},${col}`);
+      this.potential_moves.push({
+        next_row: row,
+        next_col: col,
+        node,
+        capture: true,
+      });
+      return true;
+    }
+  }
+
+  checkCapture(row, col) {
+
+    if (this.name == "pawn") {
+      const left = col - 1;
+      const right = col + 1;
+
+      // Check left diagonal - verify it's in bounds first
+      if (left >= 0 && tracker[row][left]) {
+        this.addToList(row, left);
+      }
+      // Check right diagonal - verify it's in bounds first
+      if (right <= 7 && tracker[row][right]) {
+        this.addToList(row, right);
+      }
+      return false;
+    }
+
+    
+
+    if (!tracker[row][col]) {
+      return false;
+    } else {
+      this.addToList(row, col);
+    }
+
+    return true;
   }
 }
 
@@ -201,6 +243,7 @@ class Pawn extends ChessPiece {
     super(name, color, R, C);
     this.ranged = false;
     this.moves = color == "white" ? [[-1, 0]] : [[1, 0]];
+    this.eat = [[0, -1], [0, 1]];
     this.icon = pawn_icon;
   }
 }
@@ -312,8 +355,10 @@ let next_moves = [];
 
   const rook = new Rook("rook", "white", 4, 4);
   tracker[4][4] = rook;
-  const knight = new Knight("knight", "black", 7, 3);
-  tracker[7][3] = knight;
+  const knight = new Knight("knight", "black", 5, 4);
+  tracker[5][4] = knight;
+  const pawn = new Pawn("pawn", "white", 6, 5);
+  tracker[6][5] = pawn;
 
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
@@ -407,16 +452,6 @@ function renderNextMoves(row, col, cell) {
       el.node.classList.add("capture");
     }
   });
-}
-
-function checkCapture(row, col, potential_moves) {
-  if (!tracker[row][col]) return false;
-
-  if (tracker[row][col].color !== tracker[active[0]][active[1]].color) {
-    const node = cells.get(`${row},${col}`);
-    potential_moves.push({ next_row: row, next_col: col, node, capture: true });
-    return true;
-  } else return true;
 }
 
 // changes the object's row and col
