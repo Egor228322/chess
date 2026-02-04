@@ -165,7 +165,6 @@ class ChessPiece {
   }
 
   next_move() {
-    const potential_moves = [];
 
     for (let i = 0; i < this.moves.length; i++) {
       let row = this.R;
@@ -225,8 +224,6 @@ class ChessPiece {
       }
       return false;
     }
-
-    
 
     if (!tracker[row][col]) {
       return false;
@@ -353,24 +350,74 @@ let next_moves = [];
     }
   }
 
-  const rook = new Rook("rook", "white", 4, 4);
-  tracker[4][4] = rook;
-  const knight = new Knight("knight", "black", 5, 4);
-  tracker[5][4] = knight;
-  const pawn = new Pawn("pawn", "white", 6, 5);
-  tracker[6][5] = pawn;
-
-  for (let i = 0; i < 8; i++) {
+  //render white pawns
+  const pawn_rows = [1, 6];
+  for (let i = 0; i < 2; i++) {
+    const color = i === 0 ? 'black' : 'white';
     for (let j = 0; j < 8; j++) {
-      if (tracker[i][j]) {
-        const start_point = cells.get(`${i},${j}`);
+      const pawn = new Pawn("pawn", color, pawn_rows[i], j);
+      tracker[pawn_rows[i]][j] = pawn;
+      const start_point = cells.get(`${pawn_rows[i]},${j}`);
+      const img = document.createElement("svg");
+      img.className = "piece";
+      img.innerHTML = tracker[pawn_rows[i]][j].icon;
+      start_point.appendChild(img);
+    }
+  }
+
+  //render other pieces
+  const piece_row = [0, 7];
+  const piece_col = [0, 7];
+  for (let x = 0; x < 3; x++) {
+    let name = '';
+    if (x === 0) {
+      name = 'rook';
+    } else if (x === 1) {
+      name = 'knight';
+    } else {
+      name = 'bishop';
+    }
+    for (let i = 0; i < 2; i++) {
+      const color = i === 0 ? "black" : "white";
+      for (let j = 0; j < 2; j++) {
+        let piece = '';
+        if (x === 0) {
+          piece = new Rook(name, color, piece_row[i], piece_col[j]);
+        } else if (x === 1) {
+          piece = new Knight(name, color, piece_row[i], piece_col[j]);
+        } else {
+          piece = new Bishop(name, color, piece_row[i], piece_col[j]);
+        }
+        
+        tracker[piece_row
+        [i]][piece_col[j]] = piece;
+        const start_point = cells.get(`${piece_row[i]},${piece_col[j]}`);
         const img = document.createElement("svg");
         img.className = "piece";
-        img.innerHTML = tracker[i][j].icon;
+        img.innerHTML = tracker[piece_row[i]][piece_col[j]].icon;
         start_point.appendChild(img);
       }
     }
+    piece_col[0] = piece_col[0] + 1;
+    piece_col[1] = piece_col[1] - 1;
   }
+
+  const king = new King('king', 'black', 0, 3);
+  const king1 = new King('king', 'white', 7, 4);
+  const queen = new Queen('queen', 'black', 0, 4);
+  const queen1 = new Queen('queen', 'white', 7, 3);
+  const arr = [king, king1, queen, queen1];
+  arr.forEach(el => {
+    const row = el.R;
+    const col = el.C;
+    tracker[row][col] = el;
+    const start_point = cells.get(`${row},${col}`);
+    const img = document.createElement("svg");
+    img.className = "piece";
+    img.innerHTML = tracker[row][col].icon;
+    start_point.appendChild(img);
+  });
+  
 })();
 
 document.querySelector(".board").addEventListener("click", (e) => {
