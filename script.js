@@ -326,7 +326,6 @@ const grid = document.querySelector(".grid");
 const dim = grid.getBoundingClientRect();
 const tracker = Array.from({ length: 8 }, () => new Array(8).fill(null));
 const cells = new Map();
-let RUNNING = true;
 let turn = true;
 let active = [];
 let next_moves = [];
@@ -402,6 +401,7 @@ let next_moves = [];
     piece_col[1] = piece_col[1] - 1;
   }
 
+  //render king and queen
   const king = new King('king', 'black', 0, 3);
   const king1 = new King('king', 'white', 7, 4);
   const queen = new Queen('queen', 'black', 0, 4);
@@ -420,22 +420,25 @@ let next_moves = [];
   
 })();
 
-document.querySelector(".board").addEventListener("click", (e) => {
-  const [row, col] = getCell(e);
-  const cell = cells.get(`${row},${col}`);
-  const obj = active.length ? tracker[active[0]][active[1]] : "";
-  const piece = tracker[row][col];
 
-  if (active.length !== 0 && action(row, col)) {
-    renderPiece(row, col, obj);
-    cleanUpBoard(true, row, col);
-  } else if (active.length !== 0) {
-    cleanUpBoard(false, row, col);
-    renderNextMoves(row, col, cell);
-  } else if (piece) {
-    renderNextMoves(row, col, cell);
-  }
-});
+document.querySelector(".board").addEventListener("click", handleClick);
+
+function handleClick(e) {
+    const [row, col] = getCell(e);
+    const cell = cells.get(`${row},${col}`);
+    const obj = active.length ? tracker[active[0]][active[1]] : "";
+    const piece = tracker[row][col];
+
+    if (active.length !== 0 && action(row, col)) {
+      renderPiece(row, col, obj);
+      cleanUpBoard(true, row, col);
+    } else if (active.length !== 0) {
+      cleanUpBoard(false, row, col);
+      renderNextMoves(row, col, cell);
+    } else if (piece) {
+      renderNextMoves(row, col, cell);
+    }
+}
 
 //returns row and column of clicked cell
 function getCell(e) {
@@ -447,7 +450,7 @@ function getCell(e) {
 }
 
 //resets next moves and active
-function cleanUpBoard(valid, row, col) {
+function cleanUpBoard(valid) {
   const node = cells.get(`${active[0]},${active[1]}`);
   node.classList.remove("active");
 
@@ -521,7 +524,12 @@ function move(row, col) {
   obj.R = row;
   obj.C = col;
   tracker[active[0]][active[1]] = null;
+  if (tracker[row][col] && tracker[row][col].name == 'king') endGame();
   tracker[row][col] = obj;
   
   turn = !turn;
+}
+
+function endGame() {
+  document.querySelector('.board').removeEventListener('click', handleClick);
 }
